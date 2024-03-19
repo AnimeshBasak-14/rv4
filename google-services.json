@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "582611074443",
+    "firebase_url": "https://rvnew-918ab-default-rtdb.firebaseio.com",
+    "project_id": "rvnew-918ab",
+    "storage_bucket": "rvnew-918ab.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582611074443:android:018331246464fb584b438e",
+        "android_client_info": {
+          "package_name": "com.example.rv4"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_7KPeAGyU-0pmLEIGkZyUDSP4fTQmVmo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
