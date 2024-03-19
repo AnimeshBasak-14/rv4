@@ -28,28 +28,22 @@ class SalarySlip : AppCompatActivity() {
         val employeeId = intent.getStringExtra("employeeId").toString()
         val selectedMonth = intent.getStringExtra("selectedMonth").toString()
 
-        if (selectedMonth.isNotEmpty() && employeeId.toDoubleOrNull() != null) {
+        if (selectedMonth.isNotEmpty() && employeeId.isNotEmpty() ) {
             mDatabase = FirebaseDatabase
                 .getInstance()
                 .getReference("17m2SXM94KhBDJ3tdHR3lI4HLOZK6CjHQgzg8Zq_gX9Q")
                 .child("Sheet1")
-
-            mDatabase.orderByChild("EID").
-//            equalTo(employeeId.toDouble()).
-            addListenerForSingleValueEvent(object : ValueEventListener {
+            mDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-
-
-                        for (childSnapshot in snapshot.children) {
-                            val paySlipMonth =
-                                childSnapshot.child("PaySlipMonth").getValue(String::class.java)
+                    for (childSnapshot in snapshot.children) {
+                        val paySlipMonth = childSnapshot.child("PaySlipMonth").getValue(String::class.java)
+                        val emailId = childSnapshot.child("EmailId").getValue(String::class.java)
                             val eid = childSnapshot.child("EID").getValue(Long::class.java)
                             if (eid == employeeId.toLong() && paySlipMonth == selectedMonth) {
 
-                                val itemCount = snapshot.child(childSnapshot.toString()).
-                                childrenCount.toInt()
+                                val itemCount = childSnapshot.childrenCount.toInt()
                                 salaryList =
-                                    arrayOfNulls<SalaryModel>(itemCount + 29) as Array<SalaryModel>
+                                    arrayOfNulls<SalaryModel>(itemCount + 0) as Array<SalaryModel>
                                 println(itemCount)
                                 var index = 0
 
@@ -61,36 +55,35 @@ class SalarySlip : AppCompatActivity() {
 //                                        .getValue(Long::class.java)
 //                                )
                                 salaryList[index++] = SalaryModel(
-                                    " Employee ID: " + snapshot
+                                    " Employee ID: " + childSnapshot
                                         .child("EID")
                                         .getValue(Long::class.java)
                                 )
-                                Toast.makeText(
-                                    this@SalarySlip,
-                                    "EID: ${snapshot
-                                        .child(childSnapshot.toString())
-                                        .child("EID")
-                                        .getValue(Long::class.java)}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
 
                                 salaryList[index++] = SalaryModel(
-                                    " Employee Name: " + snapshot.child(childSnapshot.toString())
+                                    " Employee Name: " + childSnapshot
                                         .child("EmployeeName")
                                         .getValue(String::class.java)
                                 )
                                 salaryList[index++] = SalaryModel(
-                                    " Pay Slip Month: " + snapshot.child(childSnapshot.toString())
+                                    " Pay Slip Month: " + childSnapshot
                                         .child("PaySlipMonth")
                                         .getValue(String::class.java)
                                 )
                                 salaryList[index++] = SalaryModel(
-                                    " Email-id: " + snapshot.child(childSnapshot.toString())
+                                    " Email-id: " + childSnapshot
                                         .child("EmailId")
                                         .getValue(String::class.java)
                                 )
+                                val email = childSnapshot.child("EmailId").getValue(String::class.java)
+                                Toast.makeText(
+                                    this@SalarySlip,
+                                    "EID: $email",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+
                                 salaryList[index++] = SalaryModel(
-                                    " Branch: " + snapshot.child(childSnapshot.toString())
+                                    " Branch: " + childSnapshot
                                         .child("Branch")
                                         .getValue(String::class.java)
                                 )
@@ -98,46 +91,46 @@ class SalarySlip : AppCompatActivity() {
                                 // Basic Pay
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Basic Pay: " + snapshot.child(childSnapshot.toString())
+                                        " Basic Pay: " + childSnapshot
                                             .child("BasicPay").getValue()
                                     )
 
                                 // Grade Pay
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Grade Pay: " + snapshot.child(childSnapshot.toString())
+                                        " Grade Pay: " + childSnapshot
                                             .child("GradePay").getValue()
                                     )
 
                                 // Special Pay
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Special Pay: " + snapshot.child(childSnapshot.toString())
+                                        " Special Pay: " + childSnapshot
                                             .child("SpecialPay").getValue()
                                     )
                                 // DA
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Dearness Allowance: " + snapshot.child(childSnapshot.toString())
+                                        " Dearness Allowance: " + childSnapshot
                                             .child("DearnessAllowance")
                                             .getValue()
                                     )
 
                                 // SCA
                                 salaryList[index++] =
-                                    SalaryModel(" SCA: " + snapshot.child(childSnapshot.toString())
+                                    SalaryModel(" SCA: " + childSnapshot
                                         .child("SCA").getValue())
 
 
                                 // SDA
                                 salaryList[index++] =
-                                    SalaryModel(" SDA: " + snapshot.child(childSnapshot.toString())
+                                    SalaryModel(" SDA: " + childSnapshot
                                         .child("SDA").getValue())
 
                                 // Transport Allowance
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Transport Allowance: " + snapshot.child(childSnapshot.toString())
+                                        " Transport Allowance: " + childSnapshot
                                             .child("TransportAllowance")
                                             .getValue()
                                     )
@@ -145,111 +138,118 @@ class SalarySlip : AppCompatActivity() {
 
                                 // HRA
                                 salaryList[index++] =
-                                    SalaryModel(" HRA: " + snapshot.child(childSnapshot.toString())
+                                    SalaryModel(" HRA: " + childSnapshot
                                         .child("HRA").getValue())
 
                                 // Deputation
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Deputation: " + snapshot.child(childSnapshot.toString())
+                                        " Deputation: " + childSnapshot
                                             .child("Deputation").getValue()
                                     )
 
                                 // DA(Arrear)
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " DA(Arrear): " + snapshot.child(childSnapshot.toString())
+                                        " DA(Arrear): " + childSnapshot
                                             .child("DA(Arrear)").getValue()
                                     )
                                 // TA(Arrear)
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " TA(Arrear): " + snapshot.child(childSnapshot.toString())
+                                        " TA(Arrear): " + childSnapshot
                                             .child("TA(Arrear)").getValue()
                                     )
                                 // IncomeTax
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Income Tax: " + snapshot.child(childSnapshot.toString())
+                                        " Income Tax: " + childSnapshot
                                             .child("IncomeTax").getValue()
                                     )
                                 // NPS
                                 salaryList[index++] =
-                                    SalaryModel(" NPS: " + snapshot.child(childSnapshot.toString())
+                                    SalaryModel(" NPS: " + childSnapshot
                                         .child("NPS").getValue())
                                 // PMCaresFund
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " PM Cares Fund: " + snapshot.child(childSnapshot.toString())
+                                        " PM Cares Fund: " + childSnapshot
                                             .child("PMCaresFund")
                                             .getValue()
                                     )
                                 // GSLIScheme
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " GSLI Scheme: " + snapshot.child(childSnapshot.toString())
+                                        " GSLI Scheme: " + childSnapshot
                                             .child("GSLIScheme").getValue()
                                     )
                                 // DeductionTA
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Deduction TA: " + snapshot.child(childSnapshot.toString())
+                                        " Deduction TA: " + childSnapshot
                                             .child("DeductionTA").getValue()
                                     )
                                 // Busfare/HireCharges
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Busfare/Hire Charges: " + snapshot.child(childSnapshot.toString())
+                                        " Busfare/Hire Charges: " + childSnapshot
                                             .child("BusfareHireCharges")
                                             .getValue()
                                     )
                                 // LTC/TA/Medical
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " LTC/TA/Medical: " + snapshot.child(childSnapshot.toString())
+                                        " LTC/TA/Medical: " + childSnapshot
                                             .child("LTCTAMedical")
                                             .getValue()
                                     )
                                 // LicenceFee
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Licence Fee: " + snapshot.child(childSnapshot.toString())
+                                        " Licence Fee: " + childSnapshot
                                             .child("LicenceFee").getValue()
                                     )
                                 // QuarterFee
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Quarter Fee: " + snapshot.child(childSnapshot.toString())
+                                        " Quarter Fee: " + childSnapshot
                                             .child("QuarterFee").getValue()
                                     )
                                 // PayRecovery
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Pay Recovery: " + snapshot.child(childSnapshot.toString())
+                                        " Pay Recovery: " + childSnapshot
                                             .child("PayRecovery").getValue()
                                     )
                                 // TotalPayable
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Total Payable: " + snapshot.child(childSnapshot.toString())
+                                        " Total Payable: " + childSnapshot
                                             .child("TotalPayable")
                                             .getValue()
                                     )
                                 // TotalDeduction
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Total Deduction: " + snapshot.child(childSnapshot.toString())
+                                        " Total Deduction: " + childSnapshot
                                             .child("TotalDeduction")
                                             .getValue()
                                     )
                                 // NetPayable
                                 salaryList[index++] =
                                     SalaryModel(
-                                        " Net Payable: " + snapshot.child(childSnapshot.toString())
+                                        " Net Payable: " + childSnapshot
                                             .child("NetPayable").getValue()
                                     )
-//                            break
+                            break
 
+                            }
+                        else{
+                                Toast.makeText(
+                                    this@SalarySlip,
+                                    "Found: ${"$employeeId: $selectedMonth"}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
 
