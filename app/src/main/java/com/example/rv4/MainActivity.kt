@@ -1,7 +1,9 @@
 package com.example.rv4
 
+import android.content.ContentValues
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -17,6 +19,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainBinding: ActivityMainBinding
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var mDatabase: DatabaseReference
+    private var ename: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,19 +28,17 @@ class MainActivity : AppCompatActivity() {
         val generateButton: Button = findViewById(R.id.buttonGenerateSalarySlip)
 
         firebaseAuth = FirebaseAuth.getInstance()
-//        databaseReference = FirebaseDatabase.getInstance().reference.child("users")
 
         mainBinding.progressBar.visibility = View.INVISIBLE
 
         mainBinding.buttonSignOut.setOnClickListener {
             firebaseAuth.signOut()
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }
-
-
-        val editTextEmployeeId = findViewById<EditText>(R.id.editTextEmployeeId)
+        var user = firebaseAuth.currentUser;
+        var email = user?.email;
 
         val spinner: Spinner = findViewById(R.id.month_spinner)
         // Create an ArrayAdapter using the string array and a default spinner layout.
@@ -53,44 +54,66 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-//        println(employeeId)
         mainBinding.buttonGenerateSalarySlip.setOnClickListener {
-
             val selectedMonth = spinner.selectedItem.toString()
-            val employeeId = editTextEmployeeId.text.toString().trim()
-            generateSalarySlip(employeeId,selectedMonth)
-
-                // Check if the user exists in the database
-//                val selectedMonth = spinner.selectedItem.toString() // Get the selected month
-//                checkUserExistence(employeeId, selectedMonth)
-
-            }
-
-
-    }
-
-
-    private fun generateSalarySlip(employeeId: String, selectedMonth: String) {
-        // Here you can implement the logic to generate the salary slip
-        // For demonstration purposes, let's navigate to the SalarySlip activity
-
-
-            Toast.makeText(
-                this@MainActivity,
-                "Found: ${"$employeeId: $selectedMonth"}",
-                Toast.LENGTH_SHORT
-            ).show()
-
-
-
-        val intent = Intent(this, SalarySlip::class.java).apply {
-            putExtra("employeeId", employeeId)
-            putExtra("selectedMonth", selectedMonth)
+            val useremail = email.toString().trim()
+            generateSalarySlip(useremail,selectedMonth)
         }
-        startActivity(intent)
-
-        // Hide progress bar after navigating
-        mainBinding.progressBar.visibility = View.INVISIBLE
     }
 
+
+    private fun generateSalarySlip(useremail: String, selectedMonth: String) {
+
+
+
+        if (selectedMonth.isNotEmpty() && useremail.isNotEmpty() ) {
+            mDatabase = FirebaseDatabase
+                .getInstance()
+                .getReference("17m2SXM94KhBDJ3tdHR3lI4HLOZK6CjHQgzg8Zq_gX9Q")
+                .child("Sheet1")
+            mDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (childSnapshot in snapshot.children) {
+                        val paySlipMonth = childSnapshot.child("PaySlipMonth").getValue(String::class.java)
+                        val emailId = childSnapshot.child("EmailId").getValue(String::class.java)
+                        ename = childSnapshot.child("EmployeeName").getValue(String::class.java).toString()
+
+                        if (emailId == useremail && paySlipMonth == selectedMonth) {
+                            val eid = childSnapshot.child("EID").getValue(Long::class.java)
+                            // Hide progress bar after navigating
+                            mainBinding.progressBar.visibility = View.INVISIBLE
+
+                            val intent = Intent(this@MainActivity, SalarySlip::class.java).apply {
+                                putExtra("eid", eid.toString())
+                            }
+                            startActivity(intent)
+                            return  // Break out of the loop
+                        }
+                    }
+
+                    Toast.makeText(this@MainActivity,
+                        "Wrong selected month for $ename",
+                        Toast.LENGTH_SHORT).show()
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Handle database error
+                    Log.e(ContentValues.TAG, "Database error occurred: ${error.message}")
+                    // You can also show a Toast message to the user
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Database error occurred: ${error.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+            )
+        }
+        else {
+            Toast.makeText(this@MainActivity,
+                "Empty email",
+                Toast.LENGTH_SHORT).show()
+        }
+    }
 }
